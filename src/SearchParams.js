@@ -1,40 +1,43 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import useBreedList from "./useBreedList";
 import Results from "./Results";
+import ThemeContext from "./ThemeContext";
 
 const SearchParams = () => {
   const [location, setLocation] = useState("India, Delhi"); //
   const [animal, setAnimal] = useState(""); //
   const [breed, setBreed] = useState(""); //pass in the default value here ""
   const [pets, setPets] = useState([]);
-  const [breeds]= useBreedList(animal);//this hook/state depends on another state (hook)
+  const [breeds] = useBreedList(animal); //this hook/state depends on another state (hook)
   const ANIMALS = ["dog", "cat", "bird", "tiger"]; //having all these states in one?
- 
+  const COLORS = ["blue", "black", "pink", "green", "purple", "cyan"];
+  const [theme, setTheme] = useContext(ThemeContext);
+
   useEffect(() => {
     //all of the asynch code
     requestPets();
   }, []); //eslint-disable-line
-   //[] to stop after once //run anytime when animal(state) updates
+  //[] to stop after once //run anytime when animal(state) updates
 
   async function requestPets() {
-        const res = await fetch(
-        `http://pets-v2.dev-apis.com/pets?animal=${animal}&location=${location}&breed=${breed}`
-        );
+    const res = await fetch(
+      `http://pets-v2.dev-apis.com/pets?animal=${animal}&location=${location}&breed=${breed}`
+    );
 
-        const json = await res.json();
+    const json = await res.json();
 
-        console.log(json);
-        setPets(json.pets); //;->triggers render ->setPets();->trigger render ...                 //causes infinite loo
-    }
+    console.log(json);
+    setPets(json.pets); //;->triggers render ->setPets();->trigger render ...                 //causes infinite loo
+  }
 
   return (
     <div className="search-params">
-      <form onSubmit={
-          (e)=>{
-                e.preventDefault();
-                requestPets();
-          }
-      }>
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          requestPets();
+        }}
+      >
         <label htmlFor="location">
           Location
           <input
@@ -55,13 +58,11 @@ const SearchParams = () => {
             onBlur={(e) => setAnimal(e.target.value)}
           >
             <option /> {/*equivalent to <option></option>*/}
-            
             {ANIMALS.map((animal) => (
               <option value={animal} key={animal}>
                 {animal}
               </option>
             ))}
-
           </select>
         </label>
 
@@ -81,9 +82,27 @@ const SearchParams = () => {
             ))}
           </select>
         </label>
-        <button>Submit</button>
+
+        <label htmlFor="theme">
+          Theme
+          <select
+            id="theme"
+            value={theme}
+            onChange={(e) => setTheme(e.target.value)}
+            onBlur={(e) => setTheme(e.target.value)}
+          >
+            <option /> {/*equivalent to <option></option>*/}
+            {COLORS.map((color) => (
+              <option value={color} key={color}>
+                {color}
+              </option>
+            ))}
+          </select>
+        </label>
+
+        <button style={{ backgroundColor: theme }}>Submit</button>
       </form>
-      <Results pets= {pets} />
+      <Results pets={pets} />
     </div>
   );
 };

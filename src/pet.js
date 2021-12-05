@@ -1,5 +1,5 @@
 import React from "react";
-
+import { Link } from "react-router-dom";
 // const Pet = () => {
 //     return React.createElement(
 //       "div",
@@ -10,30 +10,22 @@ import React from "react";
 //     );
 //   };
 
-const Pet = ({
-  name,
-  animal,
-  breed,
-  images,
-  city,
-  state,
-  id
-}) => {
-  let hero="http://pets-v2.dev-api.com/pets/none.jpg";
-  if(images.length){
-    hero=images[0];
+const Pet = ({ name, animal, breed, images, city, state, id }) => {
+  let hero = "http://pets-v2.dev-api.com/pets/none.jpg";
+  if (images.length) {
+    hero = images[0];
   }
   return (
-    <a href={`/details/${id}`} className="pet">
-          <div className="image-container">
-      <img src={hero} alt={`${animal},${name}`} />
-    </div>
+    <Link to={`/details/${id}`} className="pet">
+      <div className="image-container">
+        <img src={hero} alt={`${animal},${name}`} />
+      </div>
 
-    <div className="info">
+      <div className="info">
         <h1>{name}</h1>
         <h2>{`${name}-${breed}-${animal}`}</h2>
-    </div>
-    </a>
+      </div>
+    </Link>
   );
 };
 
