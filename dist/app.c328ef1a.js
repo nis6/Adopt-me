@@ -29566,7 +29566,48 @@ if ("development" === 'production') {
 } else {
   module.exports = require('./cjs/react-dom.development.js');
 }
-},{"./cjs/react-dom.development.js":"../node_modules/react-dom/cjs/react-dom.development.js"}],"../node_modules/@babel/runtime/helpers/esm/inheritsLoose.js":[function(require,module,exports) {
+},{"./cjs/react-dom.development.js":"../node_modules/react-dom/cjs/react-dom.development.js"}],"useBreedList.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = useBreedList;
+
+var _react = require("react");
+
+const localCache = {}; //local casche to store the already requestes breed list for an animal
+
+function useBreedList(animal) {
+  //have to pass the animal state in this hook
+  const [breedList, setBreedList] = (0, _react.useState)([]);
+  const [status, setStatus] = (0, _react.useState)("unloaded");
+  (0, _react.useEffect)(() => {
+    if (!animal) {
+      setBreedList([]);
+    } else if (localCache[animal]) {
+      setBreedList(localCache([animal]));
+    } else {
+      requestBreedList();
+    }
+
+    async function requestBreedList() {
+      setBreedList([]);
+      setStatus("loading");
+      console.log("animal " + animal);
+      const res = await fetch(`http://pets-v2.dev-apis.com/breeds?animal=${animal}`);
+      const json = await res.json();
+      localCache[animal] = json.breeds || [];
+      console.log("json--" + json);
+      console.log("animal breeds--" + localCache[animal]);
+      setBreedList(localCache[animal]);
+      setStatus("loaded");
+    }
+  }, [animal]);
+  console.log("breed list " + breedList);
+  return [breedList, status];
+}
+},{"react":"../node_modules/react/index.js"}],"../node_modules/@babel/runtime/helpers/esm/inheritsLoose.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -34989,48 +35030,7 @@ const Pet = ({
 
 var _default = Pet;
 exports.default = _default;
-},{"react":"../node_modules/react/index.js","react-router-dom":"../node_modules/react-router-dom/esm/react-router-dom.js","react/jsx-runtime":"../node_modules/react/jsx-runtime.js"}],"useBreedList.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = useBreedList;
-
-var _react = require("react");
-
-const localCache = {}; //local casche to store the already requestes breed list for an animal
-
-function useBreedList(animal) {
-  //have to pass the animal state in this hook
-  const [breedList, setBreedList] = (0, _react.useState)([]);
-  const [status, setStatus] = (0, _react.useState)("unloaded");
-  (0, _react.useEffect)(() => {
-    if (!animal) {
-      setBreedList([]);
-    } else if (localCache[animal]) {
-      setBreedList(localCache([animal]));
-    } else {
-      requestBreedList();
-    }
-
-    async function requestBreedList() {
-      setBreedList([]);
-      setStatus("loading");
-      console.log("animal " + animal);
-      const res = await fetch(`http://pets-v2.dev-apis.com/breeds?animal=${animal}`);
-      const json = await res.json();
-      localCache[animal] = json.breeds || [];
-      console.log("json--" + json);
-      console.log("animal breeds--" + localCache[animal]);
-      setBreedList(localCache[animal]);
-      setStatus("loaded");
-    }
-  }, [animal]);
-  console.log("breed list " + breedList);
-  return [breedList, status];
-}
-},{"react":"../node_modules/react/index.js"}],"Results.js":[function(require,module,exports) {
+},{"react":"../node_modules/react/index.js","react-router-dom":"../node_modules/react-router-dom/esm/react-router-dom.js","react/jsx-runtime":"../node_modules/react/jsx-runtime.js"}],"Results.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -35109,19 +35109,19 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 const SearchParams = () => {
   const [location, setLocation] = (0, _react.useState)("India, Delhi"); //
 
-  const [animal, setAnimal] = (0, _react.useState)(""); //
+  const [animal, setAnimal] = (0, _react.useState)(""); //  ANIMALS manually given
 
   const [breed, setBreed] = (0, _react.useState)(""); //pass in the default value here ""
 
   const [pets, setPets] = (0, _react.useState)([]);
-  const [breeds] = (0, _useBreedList.default)(animal); //this hook/state depends on another state (hook)
+  const [breeds] = (0, _useBreedList.default)(animal); //based on animal state we request breeds //just a custom hook to add abstraction to a common logic
 
-  const ANIMALS = ["dog", "cat", "bird", "tiger"]; //having all these states in one?
-
+  const ANIMALS = ["dog", "cat", "bird", "tiger"];
   const COLORS = ["blue", "black", "pink", "green", "purple", "cyan"];
-  const [theme, setTheme] = (0, _react.useContext)(_ThemeContext.default);
+  const [theme, setTheme] = (0, _react.useContext)(_ThemeContext.default); //this function / hook runs right after component has been changed [after every render]
+
   (0, _react.useEffect)(() => {
-    //all of the asynch code
+    //all of the asynch calls go in here, because it can effect the other components so can't run at the same time as render
     requestPets();
   }, []); //eslint-disable-line
   //[] to stop after once //run anytime when animal(state) updates
@@ -35130,7 +35130,7 @@ const SearchParams = () => {
     const res = await fetch(`http://pets-v2.dev-apis.com/pets?animal=${animal}&location=${location}&breed=${breed}`);
     const json = await res.json();
     console.log(json);
-    setPets(json.pets); //;->triggers render ->setPets();->trigger render ...                 //causes infinite loo
+    setPets(json.pets); //;->triggers render ->setPets();->trigger render ...                 
   }
 
   return (
@@ -35291,7 +35291,7 @@ class Carousel extends _react.Component {
           (0, _jsxRuntime.jsx)("img", {
             src: photo,
             "data-index": index,
-            onClick: this.handleIndexClick //this here is outside of any context, so use arrow function for handleIndexClick
+            onClick: this.handleIndexClick //this inside handleIndexClick is outside of any context, so use arrow function for handleIndexClick
             ,
             className: index == active ? "active" : "",
             alt: "animal thumbnail"
@@ -35347,13 +35347,7 @@ class ErrorBoundary extends _react.Component {
     setTimeout(() => this.setState({
       redirect: true
     }), 1000);
-  } // componentDidUpdate(){
-  //     console.log("this function will never be called for the first time");
-  //     if(this.state.hasError){
-  //         setTimeout(()=>this.setState({redirect:true}),1000);
-  //     }
-  // }
-
+  }
 
   render() {
     if (this.state.redirect) {
@@ -35405,10 +35399,11 @@ const modalRoot = document.getElementById("modal");
 const Modal = ({
   children
 }) => {
-  const elRef = (0, _react.useRef)(null);
+  const elRef = (0, _react.useRef)(null); //makes elRef.current =null
 
   if (!elRef.current) {
-    elRef.current = document.createElement("div"); //always create a div if and only if there isn't one already
+    //so that everytime Modal class comp is being executed, a new div is not being created 
+    elRef.current = document.createElement("div"); //always create a div if and only if there isn't already one 
   }
 
   (0, _react.useEffect)(() => {
@@ -35458,7 +35453,12 @@ class Details extends _react.Component {
   constructor(...args) {
     super(...args);
 
-    _defineProperty(this, "toggleModal", function () {
+    _defineProperty(this, "state", {
+      loading: true,
+      showModal: false
+    });
+
+    _defineProperty(this, "toggleModal", () => {
       this.setState({
         showModal: !this.state.showModal
       });
@@ -35467,31 +35467,21 @@ class Details extends _react.Component {
     _defineProperty(this, "adopt", function () {
       window.location = "http://bit.ly/pet-adopt";
     });
-
-    _defineProperty(this, "state", {
-      loading: true,
-      showModal: false
-    });
   }
 
-  //a va;id syntax for above constructor code
   async componentDidMount() {
     const res = await fetch(`http://pets-v2.dev-apis.com/pets?id=${this.props.match.params.id}`); //match.params from router matching link
 
-    const json = await res.json(); // this.setState({
-    //     loading: false,
-    //     name:json.pets[0].name,
-    //     breed:json.pets.breed
-    //     //and so on
-    // })
+    const json = await res.json(); // makes component render two times 
 
     this.setState(Object.assign({
       loading: false
     }, json.pets[0]));
-  } // errobj={'new error object':'yes'}
+    console.log(this.state);
+  }
+
+  // errobj={'new error object':'yes'}
   // throw Error(errobj)
-
-
   render() {
     const {
       animal,
@@ -35539,7 +35529,8 @@ class Details extends _react.Component {
               style: {
                 backgroundColor: theme
               },
-              onClick: this.toggleModal,
+              onClick: this.toggleModal.bind(this) //use arrow function either in callback or in function expression
+              ,
               children: ["Adopt ", name]
             })
           }), showModal ?
@@ -35600,8 +35591,6 @@ var _react = _interopRequireWildcard(require("react"));
 
 var _reactDom = _interopRequireDefault(require("react-dom"));
 
-var _pet = _interopRequireDefault(require("./pet"));
-
 var _SearchParams = _interopRequireDefault(require("./SearchParams"));
 
 var _reactRouterDom = require("react-router-dom");
@@ -35619,11 +35608,12 @@ function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "functio
 function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
 
 const App = () => {
-  const [theme] = (0, _react.useState)("darkblue");
+  const theme = (0, _react.useState)("darkblue"); //what if const [theme]... // what if const theme ="darkblue"
+
   return (
     /*#__PURE__*/
     (0, _jsxRuntime.jsx)(_ThemeContext.default.Provider, {
-      value: [theme],
+      value: theme,
       children:
       /*#__PURE__*/
       (0, _jsxRuntime.jsx)(_react.StrictMode, {
@@ -35693,7 +35683,7 @@ _reactDom.default.render(
 //     React.createElement(Pet, { name: "luna", animal: "dog", breed: "havanese" })
 //   );
 // };
-},{"react":"../node_modules/react/index.js","react-dom":"../node_modules/react-dom/index.js","./pet":"pet.js","./SearchParams":"SearchParams.js","react-router-dom":"../node_modules/react-router-dom/esm/react-router-dom.js","./Details":"Details.js","./ThemeContext":"ThemeContext.js","react/jsx-runtime":"../node_modules/react/jsx-runtime.js"}],"../node_modules/parcel/src/builtins/hmr-runtime.js":[function(require,module,exports) {
+},{"react":"../node_modules/react/index.js","react-dom":"../node_modules/react-dom/index.js","./SearchParams":"SearchParams.js","react-router-dom":"../node_modules/react-router-dom/esm/react-router-dom.js","./Details":"Details.js","./ThemeContext":"ThemeContext.js","react/jsx-runtime":"../node_modules/react/jsx-runtime.js"}],"../node_modules/parcel/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
 var OldModule = module.bundle.Module;
@@ -35721,7 +35711,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "1055" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "1330" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

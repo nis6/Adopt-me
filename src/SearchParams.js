@@ -4,18 +4,21 @@ import Results from "./Results";
 import ThemeContext from "./ThemeContext";
 
 const SearchParams = () => {
-  const [location, setLocation] = useState("India, Delhi"); //
-  const [animal, setAnimal] = useState(""); //
-  const [breed, setBreed] = useState(""); //pass in the default value here ""
-  const [pets, setPets] = useState([]);
-  const [breeds] = useBreedList(animal); //this hook/state depends on another state (hook)
-  const ANIMALS = ["dog", "cat", "bird", "tiger"]; //having all these states in one?
-  const COLORS = ["blue", "black", "pink", "green", "purple", "cyan"];
-  const [theme, setTheme] = useContext(ThemeContext);
 
+    const [location, setLocation] = useState("India, Delhi"); //
+    const [animal, setAnimal] = useState(""); //  ANIMALS manually given
+    const [breed, setBreed] = useState(""); //pass in the default value here ""
+    const [pets, setPets] = useState([]);
+    const [breeds] = useBreedList(animal); //based on animal state we request breeds //just a custom hook to add abstraction to a common logic
+    const ANIMALS = ["dog", "cat", "bird", "tiger"]; 
+    const COLORS = ["blue", "black", "pink", "green", "purple", "cyan"];
+    const [theme,setTheme] = useContext(ThemeContext);
+
+  //this function / hook runs right after component has been changed [after every render]
   useEffect(() => {
-    //all of the asynch code
+    //all of the asynch calls go in here, because it can effect the other components so can't run at the same time as render
     requestPets();
+
   }, []); //eslint-disable-line
   //[] to stop after once //run anytime when animal(state) updates
 
@@ -23,13 +26,11 @@ const SearchParams = () => {
     const res = await fetch(
       `http://pets-v2.dev-apis.com/pets?animal=${animal}&location=${location}&breed=${breed}`
     );
-
     const json = await res.json();
-
-    console.log(json);
-    setPets(json.pets); //;->triggers render ->setPets();->trigger render ...                 //causes infinite loo
+    console.log(json)
+    setPets(json.pets); //;->triggers render ->setPets();->trigger render ...                 
   }
-
+  
   return (
     <div className="search-params">
       <form
@@ -76,9 +77,9 @@ const SearchParams = () => {
           >
             <option /> {/*equivalent to <option></option>*/}
             {breeds.map((breed) => (
-              <option value={breed} key={breed}>
-                {breed}
-              </option>
+                  <option value={breed} key={breed}>
+                    {breed}
+                  </option>
             ))}
           </select>
         </label>
@@ -99,7 +100,7 @@ const SearchParams = () => {
             ))}
           </select>
         </label>
-
+                      {/* the style string inside html , goes as an object in here*/}
         <button style={{ backgroundColor: theme }}>Submit</button>
       </form>
       <Results pets={pets} />

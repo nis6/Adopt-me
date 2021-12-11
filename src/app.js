@@ -1,43 +1,51 @@
 import React from "react";
 import ReactDOM from "react-dom";
-import Pet from "./pet";
 import SearchParams from "./SearchParams";
-import { StrictMode, useState } from "react";
+import { StrictMode , useState } from "react";
 import { BrowserRouter as Router, Route, Switch, Link } from "react-router-dom";
 import DetailsWithErrorBoundary from "./Details";
 import ThemeContext from "./ThemeContext";
 
 const App = () => {
-  const [theme] = useState("darkblue");
+  const theme = useState("darkblue"); //what if const [theme]... // what if const theme ="darkblue"
   return (
-    <ThemeContext.Provider value={[theme]}>
-      <StrictMode>
-        <div>
-          <Router>
-            <header>
-              <Link to="/">
-                <h1 className="heading"> Adopt Me! </h1>
-              </Link>
-            </header>
-            <Switch>
-              {/*to only render the first match of route */}
+    <ThemeContext.Provider value={theme}>
+        <StrictMode>
+          <div>
+            <Router>
+              <header>
+                <Link to="/">
+                  <h1 className="heading"> Adopt Me! </h1>
+                </Link>
+              </header>
+              <Switch>
+                  {/*to only render the first match of route */}
+                  
+                  <Route path="/details/:id">
+                    <DetailsWithErrorBoundary />
+                  </Route>
 
-              <Route path="/details/:id">
-                <DetailsWithErrorBoundary />
-              </Route>
+                  <Route path="/">
+                    <SearchParams />
+                  </Route>
 
-              <Route path="/">
-                <SearchParams />
-              </Route>
-            </Switch>
-          </Router>
-        </div>
-      </StrictMode>
+              </Switch>
+            </Router>
+          </div>
+        </StrictMode>
     </ThemeContext.Provider>
   );
 };
 
 ReactDOM.render(<App />, document.getElementById("root"));
+
+
+
+
+
+
+
+
 
 // const App = () => {
 //   return React.createElement(

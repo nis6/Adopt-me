@@ -29,7 +29,7 @@ class Carousel extends Component {
               key={photo}
               src={photo}
               data-index={index}
-              onClick={this.handleIndexClick} //this here is outside of any context, so use arrow function for handleIndexClick
+              onClick={this.handleIndexClick} //this inside handleIndexClick is outside of any context, so use arrow function for handleIndexClick
               className={index == active ? "active" : ""}
               alt="animal thumbnail"
             />

@@ -3,6 +3,7 @@ import { Link, Redirect } from "react-router-dom";
 
 class ErrorBoundary extends Component {
   state = { hasError: false, redirect: false };
+
   static getDerivedStateFromError() {
     return { hasError: true };
   }
@@ -11,12 +12,7 @@ class ErrorBoundary extends Component {
     console.log("ErrorBoundary caught an error ", error, info);
     setTimeout(() => this.setState({ redirect: true }), 1000);
   }
-  // componentDidUpdate(){
-  //     console.log("this function will never be called for the first time");
-  //     if(this.state.hasError){
-  //         setTimeout(()=>this.setState({redirect:true}),1000);
-  //     }
-  // }
+ 
   render() {
     if (this.state.redirect) {
       return <Redirect to="/" />;
